@@ -772,18 +772,48 @@
           box.className = 'msg-system';
           box.innerText = line.text;
 
-          // Actually execute the live backend API call on Vercel
+          // Step 1: Execute live /verify-identity to get cryptographic action token
+          if (line.text.includes('/verify-identity')) {
+            try {
+              const vRes = await fetch('/verify-identity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  session_id: 'sess_' + Date.now(),
+                  card_last_four: '8492',
+                  verification_decision: 'VERIFIED',
+                  challenge_answers: { eid_suffix: '8492' }
+                })
+              });
+              const vData = await vRes.json();
+              window._activeActionToken = vData.action_token;
+              box.innerText = `[LIVE VERIFY WEBHOOK] Session: ${vData.session_id} · Action Token Issued: ${vData.action_token ? vData.action_token.substring(0, 18) + '...' : 'NONE'} [HTTP 200 OK]`;
+            } catch (err) {
+              console.log('Verify webhook error:', err);
+            }
+          }
+
+          // Step 2: Execute live /freeze-card using the cryptographic action token
           if (line.text.includes('/freeze-card')) {
             try {
               const response = await fetch('/freeze-card', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ card_last_four: '8492', reason: 'customer_confirmed_fraud' })
+                body: JSON.stringify({
+                  action_token: window._activeActionToken,
+                  card_last_four: '8492',
+                  confirmation: true,
+                  idempotency_key: 'idemp_' + Date.now()
+                })
               });
               const resData = await response.json();
-              box.innerText = `[LIVE BACKEND CONFIRMATION] Case ${resData.case_id} · Card ending ${resData.card_last_four} FROZEN via API [HTTP 200 OK]`;
+              if (response.ok) {
+                box.innerText = `[LIVE FREEZE WEBHOOK] Case: ${resData.case_id} · Card ending ${resData.card_last_four} FROZEN via Valid Token [HTTP 200 OK]`;
+              } else {
+                box.innerText = `[SECURITY BLOCKED] ${resData.error}: ${resData.message} [HTTP ${response.status}]`;
+              }
             } catch (err) {
-              console.log('Local/fallback webhook handled:', err);
+              console.log('Freeze webhook error:', err);
             }
           }
         } else if (line.type === 'agent') {
