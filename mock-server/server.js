@@ -32,6 +32,7 @@ if (!API_SECRET) {
 // In-memory state storage (ephemeral demo sessions, idempotency cache, audit log)
 const activeSessions = new Map(); // session_id -> { verified, card_last_four, verified_at, expires_at }
 const processedIdempotencyKeys = new Set();
+const consumedTokenNonces = new Set();
 const auditLog = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -180,6 +181,15 @@ app.post('/freeze-card', (req, res) => {
       message: 'Protective action denied. Missing, forged, or expired action token. Verification required first.'
     });
   }
+
+  // 2b. Replay Protection: Single-use action token
+  if (consumedTokenNonces.has(tokenPayload.nonce)) {
+    return res.status(403).json({
+      error: 'TOKEN_ALREADY_CONSUMED',
+      message: 'Action token has already been consumed. Replay rejected.'
+    });
+  }
+  consumedTokenNonces.add(tokenPayload.nonce);
 
   // 3. Card binding check: token card must match request card
   if (tokenPayload.c4 !== card_last_four) {
