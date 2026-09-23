@@ -23,7 +23,11 @@ app.use((req, res, next) => {
 });
 
 // Server secret for signing action tokens & authenticating webhooks
-const API_SECRET = process.env.HARIS_API_SECRET || 'haris_sec_def_593a1f8b82ec4711893';
+// Loaded strictly from environment variable (NOT hardcoded in source)
+const API_SECRET = process.env.HARIS_API_SECRET;
+if (!API_SECRET) {
+  throw new Error('FATAL: HARIS_API_SECRET environment variable is missing.');
+}
 
 // In-memory state storage (ephemeral demo sessions, idempotency cache, audit log)
 const activeSessions = new Map(); // session_id -> { verified, card_last_four, verified_at, expires_at }
