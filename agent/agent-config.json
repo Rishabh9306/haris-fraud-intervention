@@ -1,0 +1,147 @@
+{
+  "name": "HARIS — Real-Time Fraud Intervention Agent",
+  "description": "ElevenLabs × Ignyte Challenge 2026. Three-sub-agent fraud intervention system for UAE retail banking.",
+  "version": "1.0.0",
+  "track": "Banking & Insurance — Real-Time Fraud Intervention",
+  "team": "HARIS",
+
+  "sub_agents": [
+    {
+      "id": "verifier",
+      "name": "VERIFIER",
+      "purpose": "Identity verification only — zero-knowledge challenge flow",
+      "tools": ["verify_identity"],
+      "tool_inheritance": false,
+      "note": "Read-only. No account actions permitted."
+    },
+    {
+      "id": "guard",
+      "name": "GUARD",
+      "purpose": "Execute single pre-approved protective action",
+      "tools": ["freeze_card"],
+      "tool_inheritance": false,
+      "note": "CRITICAL: Only freeze_card is in scope. No other tools registered. This enforces the compliance guardrail structurally."
+    },
+    {
+      "id": "liaison",
+      "name": "LIAISON",
+      "purpose": "Warm transfer and audit trail",
+      "tools": ["post_call_data", "transfer_to_human"],
+      "tool_inheritance": false
+    }
+  ],
+
+  "workflow_graph": {
+    "entry_node": "verifier",
+    "branches": [
+      {
+        "from": "verifier",
+        "condition": "verification_result == VERIFIED",
+        "to": "guard"
+      },
+      {
+        "from": "verifier",
+        "condition": "verification_result == FAILED",
+        "to": "liaison",
+        "context": { "reason": "verification_failed" }
+      },
+      {
+        "from": "verifier",
+        "condition": "customer_opted_out == true",
+        "to": "liaison",
+        "context": { "reason": "customer_opted_out" }
+      },
+      {
+        "from": "guard",
+        "condition": "always",
+        "to": "liaison"
+      }
+    ]
+  },
+
+  "tools": [
+    {
+      "name": "verify_identity",
+      "type": "webhook",
+      "method": "POST",
+      "url": "https://haris-mock.up.railway.app/verify-identity",
+      "description": "Logs verification challenge result. Returns verification status.",
+      "parameters": {
+        "result": { "type": "string", "enum": ["VERIFIED", "FAILED"] },
+        "challenge_questions_used": { "type": "array", "items": { "type": "string" } },
+        "attempts": { "type": "number" }
+      }
+    },
+    {
+      "name": "freeze_card",
+      "type": "webhook",
+      "method": "POST",
+      "url": "https://haris-mock.up.railway.app/freeze-card",
+      "description": "Executes temporary card freeze. GUARD sub-agent only.",
+      "parameters": {
+        "card_last_four": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "returns": {
+        "frozen": "boolean",
+        "timestamp": "ISO8601 string",
+        "case_id": "string"
+      }
+    },
+    {
+      "name": "post_call_data",
+      "type": "webhook",
+      "method": "POST",
+      "url": "https://haris-mock.up.railway.app/post-call-data",
+      "description": "Posts structured audit record to case management system.",
+      "parameters": {
+        "outcome": { "type": "string" },
+        "action_taken": { "type": "string" },
+        "language": { "type": "string" },
+        "verification_result": { "type": "string" },
+        "opt_out": { "type": "boolean" },
+        "case_id": { "type": "string" }
+      }
+    },
+    {
+      "name": "transfer_to_human",
+      "type": "system",
+      "description": "Warm-transfers call to human fraud agent with briefing.",
+      "parameters": {
+        "briefing": { "type": "string" }
+      }
+    }
+  ],
+
+  "voice_config": {
+    "en": { "voice_id": "Rachel", "model": "eleven_v3", "language_code": "en" },
+    "ar": { "voice_id": "Arabic_Gulf_Female", "model": "eleven_v3", "language_code": "ar" },
+    "hi": { "voice_id": "Hindi_Female", "model": "eleven_v3", "language_code": "hi" },
+    "ur": { "voice_id": "Urdu_Female", "model": "eleven_v3", "language_code": "ur" }
+  },
+
+  "stt_config": {
+    "provider": "scribe_v2_realtime",
+    "keyterm_biasing": [
+      "Emirates ID", "IBAN", "AED", "Dirham", "card number",
+      "freeze", "PIN", "OTP", "password", "transfer", "Al Ansari",
+      "Emirates NBD", "ADCB", "Mashreq", "FAB", "ENBD"
+    ]
+  },
+
+  "guardrails": {
+    "prohibited_requests": ["PIN", "password", "OTP", "full card number"],
+    "permitted_verification_factors": [
+      "last_transaction_amount",
+      "emirates_id_last_four",
+      "last_payment_recipient"
+    ],
+    "calling_hours_gst": { "start": "08:00", "end": "22:00" },
+    "opt_out_keywords": {
+      "en": ["stop", "no", "end call", "hang up", "not interested"],
+      "ar": ["لا", "وقف", "كفى", "أنهِ"],
+      "hi": ["नहीं", "रुको", "बंद करो"],
+      "ur": ["نہیں", "بند کرو", "رکو"]
+    }
+  }
+}

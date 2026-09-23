@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HARIS — Real-Time Fraud Intervention AI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0e1a;
+      color: #e8eaf6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 32px;
+      border-bottom: 1px solid #1e2740;
+      background: #0d1220;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #e53935, #b71c1c);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-text { font-weight: 700; font-size: 20px; letter-spacing: 1px; }
+    .logo-sub  { font-size: 11px; color: #7986cb; margin-left: 4px; margin-top: 2px; }
+    .badge {
+      margin-left: auto;
+      background: #1a237e22;
+      border: 1px solid #3949ab55;
+      color: #7986cb;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 48px 24px 28px;
+    }
+    .hero h1 {
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 800;
+      background: linear-gradient(135deg, #ef9a9a, #e53935, #ff8f00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 15px;
+      color: #90a4ae;
+      max-width: 560px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    /* ── Stats bar ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .stat {
+      padding: 14px 28px;
+      border: 1px solid #1e2740;
+      background: #0d1220;
+      text-align: center;
+    }
+    .stat:first-child { border-radius: 10px 0 0 10px; }
+    .stat:last-child  { border-radius: 0 10px 10px 0; }
+    .stat-num { font-size: 22px; font-weight: 800; color: #ef5350; }
+    .stat-lbl { font-size: 10px; color: #546e7a; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── Main content ── */
+    .main {
+      display: flex;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Agent card ── */
+    .agent-card {
+      flex: 1 1 340px;
+      background: #0d1220;
+      border: 1px solid #1e2740;
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .agent-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #e53935, #ff8f00);
+    }
+    .agent-card h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .agent-card p {
+      font-size: 13px;
+      color: #78909c;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Language selector */
+    .lang-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #546e7a;
+      margin-bottom: 8px;
+    }
+    .lang-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .lang-btn {
+      background: #131928;
+      border: 1px solid #1e2740;
+      color: #90a4ae;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lang-btn:hover { border-color: #3949ab; color: #e8eaf6; }
+    .lang-btn.active {
+      background: #1a237e22;
+      border-color: #3949ab;
+      color: #7986cb;
+      font-weight: 600;
+    }
+
+    /* ElevenLabs widget container */
+    .widget-wrapper {
+      background: #131928;
+      border: 1px solid #1e2740;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .widget-label {
+      font-size: 12px;
+      color: #546e7a;
+      margin-bottom: 12px;
+    }
+
+    /* Fallback call button (shows when widget isn't loaded) */
+    .call-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #c62828, #e53935);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px #e5393544;
+    }
+    .call-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px #e5393566;
+    }
+    .call-btn .pulse {
+      width: 10px; height: 10px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    /* ── Info panels ── */
+    .panels { flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; }
+
+    .panel {
+      background: #0d1220;
+      border: 1px solid #1e2740;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .panel-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #546e7a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Flow steps */
+    .flow { display: flex; flex-direction: column; gap: 0; }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 30px;
+      bottom: -8px;
+      width: 2px;
+      background: #1e2740;
+    }
+    .step-num {
+      width: 30px; height: 30px; min-width: 30px;
+      background: #131928;
+      border: 1px solid #1e2740;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #7986cb;
+      margin-bottom: 16px;
+    }
+    .step-content { padding-top: 5px; }
+    .step-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .step-desc  { font-size: 11px; color: #546e7a; line-height: 1.4; }
+
+    /* Sub-agents */
+    .agents-row { display: flex; flex-direction: column; gap: 8px; }
+    .agent-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #131928;
+      border: 1px solid #1e2740;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .chip-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+    }
+    .chip-name  { font-size: 13px; font-weight: 700; }
+    .chip-scope { font-size: 11px; color: #546e7a; }
+    .chip-tag {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid #1e2740;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #0d1220;
+    }
+    footer span { font-size: 12px; color: #37474f; }
+    .powered {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #37474f;
+    }
+    .powered strong { color: #546e7a; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🛡</div>
+  <div>
+    <div class="logo-text">HARIS</div>
+    <div class="logo-sub">Hyper-Adaptive Real-time Intervention System</div>
+  </div>
+  <span class="badge">ElevenLabs × Ignyte Challenge Demo</span>
+</header>
+
+<div class="hero">
+  <h1>Fraud Stopped in 30 Seconds.<br/>In Your Language.</h1>
+  <p>
+    HARIS is an AI voice agent that calls customers the instant a fraud signal is raised —
+    verifies identity without a PIN, freezes the card, and hands off to a human.
+    All in Arabic, Hindi, Urdu, or English.
+  </p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">&lt; 30s</div>
+      <div class="stat-lbl">Time to first contact</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">4–8 min</div>
+      <div class="stat-lbl">Current baseline</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5 langs</div>
+      <div class="stat-lbl">Supported</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-lbl">PINs ever requested</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── Agent Card ── -->
+  <div class="agent-card">
+    <h2>🎙 Talk to HARIS</h2>
+    <p>
+      Experience a live fraud intervention call. Select your language, then click the button.
+      HARIS will simulate detecting a suspicious transaction on your account.
+    </p>
+
+    <div class="lang-label">Select Language</div>
+    <div class="lang-grid">
+      <button class="lang-btn active" onclick="setLang(this,'en')">🇬🇧 English</button>
+      <button class="lang-btn"       onclick="setLang(this,'ar')">🇦🇪 Arabic (Gulf)</button>
+      <button class="lang-btn"       onclick="setLang(this,'hi')">🇮🇳 Hindi</button>
+      <button class="lang-btn"       onclick="setLang(this,'ur')">🇵🇰 Urdu</button>
+    </div>
+
+    <div class="widget-wrapper">
+      <div class="widget-label">Live AI Voice Agent — powered by ElevenLabs</div>
+      <!--
+        SETUP REQUIRED:
+        1. Go to https://elevenlabs.io/app/conversational-ai
+        2. Create your HARIS agent (use the system prompt from /agent/system-prompt.txt)
+        3. Copy the agent's Public Share link or embed widget code
+        4. Replace the button below with the ElevenLabs widget embed:
+           <elevenlabs-convai agent-id="YOUR_AGENT_ID_HERE"></elevenlabs-convai>
+           <script src="https://elevenlabs.io/convai-widget/index.js" async></script>
+      -->
+      <button class="call-btn" onclick="startCall()">
+        <span class="pulse"></span>
+        Start Fraud Intervention Demo
+      </button>
+      <p style="font-size:11px;color:#37474f;margin-top:12px;">
+        This is a sandbox demo. No real accounts or cards are affected.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Info Panels ── -->
+  <div class="panels">
+
+    <!-- Call Flow -->
+    <div class="panel">
+      <div class="panel-title">⚡ Call Flow (90 seconds end-to-end)</div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Outbound call initiated</div>
+            <div class="step-desc">Fraud signal received → HARIS calls in customer's preferred language within 15 sec</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Zero-knowledge verification</div>
+            <div class="step-desc">Identity confirmed via challenge flow (last transaction amount, Emirates ID suffix). No PIN ever requested.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Fraud context delivered</div>
+            <div class="step-desc">Plain-language description of the anomaly. Customer confirms or disputes.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Card freeze executed</div>
+            <div class="step-desc">GUARD sub-agent calls freeze webhook (its only permitted action). SMS confirmation sent.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">Warm transfer to human agent</div>
+            <div class="step-desc">Full context packet (transcript, action taken, language, verification result) handed to fraud team.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-agent architecture -->
+    <div class="panel">
+      <div class="panel-title">🏗 Three-Sub-Agent Architecture</div>
+      <div class="agents-row">
+        <div class="agent-chip">
+          <div class="chip-icon" style="background:#1a237e22;color:#7986cb;">V</div>
+          <div>
+            <div class="chip-name">VERIFIER</div>
+            <div class="chip-scope">Tools: verify_identity (read-only)</div>
+          </div>
+          <span class="chip-tag" style="background:#1a237e22;color:#7986cb;">Read only</span>
+        </div>
+        <div class="agent-chip">
+          <div class="chip-icon" style="background:#b71c1c22;color:#ef5350;">G</div>
+          <div>
+            <div class="chip-name">GUARD</div>
+            <div class="chip-scope">Tools: freeze_card only — nothing else in scope</div>
+          </div>
+          <span class="chip-tag" style="background:#b71c1c22;color:#ef5350;">Single action</span>
+        </div>
+        <div class="agent-chip">
+          <div class="chip-icon" style="background:#1b5e2022;color:#66bb6a;">L</div>
+          <div>
+            <div class="chip-name">LIAISON</div>
+            <div class="chip-scope">Tools: transfer_to_human, post_call_data</div>
+          </div>
+          <span class="chip-tag" style="background:#1b5e2022;color:#66bb6a;">Escalate</span>
+        </div>
+      </div>
+      <p style="font-size:11px;color:#37474f;margin-top:12px;line-height:1.5;">
+        Tool scoping enforces compliance structurally — GUARD cannot call any irreversible action
+        because those tools are not registered in its scope. This is a system property, not a prompt.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>HARIS — ElevenLabs × Ignyte Future of Voice AI Challenge 2026 · Sandbox only · No real financial data</span>
+  <div class="powered">Built on <strong>ElevenLabs</strong> Conversational AI Platform</div>
+</footer>
+
+<script>
+  let currentLang = 'en';
+
+  function setLang(btn, lang) {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = lang;
+  }
+
+  function startCall() {
+    // This will be replaced by the ElevenLabs widget click once agent ID is set.
+    // For now, shows the agent setup prompt.
+    const msgs = {
+      en: "SETUP REQUIRED: Add your ElevenLabs agent ID to the widget embed code in index.html\n\nSee /agent/system-prompt.txt for the full HARIS system prompt to paste into ElevenLabs.",
+      ar: "مطلوب الإعداد: أضف معرف وكيل ElevenLabs إلى كود التضمين في index.html",
+      hi: "सेटअप आवश्यक: ElevenLabs में HARIS एजेंट बनाएं और agent ID को index.html में जोड़ें",
+      ur: "سیٹ اپ درکار ہے: ElevenLabs میں HARIS ایجنٹ بنائیں اور agent ID شامل کریں"
+    };
+    alert(msgs[currentLang] || msgs['en']);
+  }
+</script>
+
+</body>
+</html>
