@@ -598,7 +598,7 @@
             <span class="flow-scope scope-readonly">Read-Only</span>
           </div>
           <div class="flow-desc">
-            Executes zero-knowledge challenge flow (Emirates ID suffix, last transaction). Hard prohibition against requesting PIN or password.
+            Executes low-privilege identity challenge flow (Emirates ID suffix, last transaction). Hard prohibition against requesting PIN or password.
           </div>
         </div>
 
@@ -615,7 +615,7 @@
             <span class="flow-scope scope-guard">freeze_card ONLY</span>
           </div>
           <div class="flow-desc">
-            Inherit Tools is disabled. Scope contains only the pre-approved <code>freeze_card</code> webhook. Irreversible account actions are structurally impossible.
+            Inherit Tools is disabled. Scope contains only the pre-approved <code>freeze_card</code> webhook. Irreversible account actions are not exposed to the agent; they require human escalation.
           </div>
         </div>
 
