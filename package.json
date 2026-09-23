@@ -1,0 +1,13 @@
+{
+  "name": "haris-fraud-intervention",
+  "version": "1.0.0",
+  "description": "HARIS — Real-Time Fraud Intervention Voice AI for UAE Banking",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}

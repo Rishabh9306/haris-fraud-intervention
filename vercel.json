@@ -1,36 +1,10 @@
 {
   "version": 2,
-  "name": "haris-fraud-intervention",
-  "builds": [
-    {
-      "src": "mock-server/server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "mock-server/server.js"
-    },
-    {
-      "src": "/verify-identity",
-      "dest": "mock-server/server.js"
-    },
-    {
-      "src": "/freeze-card",
-      "dest": "mock-server/server.js"
-    },
-    {
-      "src": "/post-call-data",
-      "dest": "mock-server/server.js"
-    },
-    {
-      "src": "/call-log",
-      "dest": "mock-server/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "index.html"
-    }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/verify-identity", "destination": "/api" },
+    { "source": "/freeze-card", "destination": "/api" },
+    { "source": "/post-call-data", "destination": "/api" },
+    { "source": "/call-log", "destination": "/api" }
   ]
 }

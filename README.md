@@ -142,9 +142,15 @@ npm start
 
 ---
 
-## Live Demo
+## Live Demo & Endpoints
 
-👉 **[Talk to HARIS](https://YOUR-GITHUB-PAGES-URL/haris/)** — experience a live fraud intervention call
+👉 **[Talk to HARIS Live Demo](https://haris-livid.vercel.app/)** — experience the intervention flow and dashboard
+
+- **Health check**: `https://haris-livid.vercel.app/api`
+- **Verify Identity Webhook**: `POST https://haris-livid.vercel.app/verify-identity`
+- **Freeze Card Webhook**: `POST https://haris-livid.vercel.app/freeze-card`
+- **Audit Data Webhook**: `POST https://haris-livid.vercel.app/post-call-data`
+- **Live Call Log**: `GET https://haris-livid.vercel.app/call-log`
 
 ---
 
