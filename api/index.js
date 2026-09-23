@@ -11,10 +11,15 @@ const crypto = require('crypto');
 const app = express();
 app.use(cors());
 app.use((req, res, next) => {
-  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+  if (req.body !== undefined) {
     return next();
   }
-  express.json()(req, res, next);
+  express.json()(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: 'INVALID_JSON', message: err.message });
+    }
+    next();
+  });
 });
 
 // Server secret for signing action tokens & authenticating webhooks

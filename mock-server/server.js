@@ -10,7 +10,17 @@ const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.body !== undefined) {
+    return next();
+  }
+  express.json()(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: 'INVALID_JSON', message: err.message });
+    }
+    next();
+  });
+});
 
 // Server secret for signing action tokens & authenticating webhooks
 const API_SECRET = process.env.HARIS_API_SECRET || 'haris_sec_def_593a1f8b82ec4711893';
